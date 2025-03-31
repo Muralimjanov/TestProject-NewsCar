@@ -1,0 +1,4 @@
+{
+    "mongoURL": "mongodb+srv://diyormuralimjanovvv:admin@cluster0.to1g2gd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+    "serverPort": 8080
+}
