@@ -1,3 +1,4 @@
+import { Router } from "express";
 import {
     addNewCar,
     updateIdCar,
@@ -5,9 +6,8 @@ import {
     getCarById,
     getAllCars,
 } from "../Controllers/newCarControllers.js";
-import express from 'express';
 
-const router = express.Router();
+const router = Router();
 
 router.post('/', addNewCar);
 router.patch('/:id', updateIdCar);
