@@ -3,8 +3,8 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import config from 'config';
 import bodyParser from 'body-parser';
-import newCarRoutes from './Routes/newCarRoutes.js';
-import auctionRoutes from './Routes/auctionRoutes.js';
+import newCarRoutes from './Routes/newsCarRoutes.js';
+import newsInteresting from './Routes/newsInterestingRoutes.js';
 import { createServer } from 'http';
 
 const app = express();
@@ -21,7 +21,7 @@ app.use(bodyParser.json({ limit: "30mb" }))
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }))
 
 app.use('/api/new-cars', newCarRoutes);
-app.use('/api/auctions', auctionRoutes);
+app.use('/api/news-interesting', newsInteresting);
 
 const connectDB = async () => {
     try {
