@@ -9,6 +9,7 @@ import {
     registerCompanySchema,
     loginSchema
 } from '../Validations/newsAuthValidation.js';
+import { validateInn } from '../utils/validateInn.js';
 
 const JWT_SECRET = config.get("JWT_SECRET");
 
@@ -24,20 +25,30 @@ export const register = async (req, res) => {
             ? await registerUserSchema.validateAsync(req.body)
             : await registerCompanySchema.validateAsync(req.body);
 
-        if (role === 'user' && !validated.termsAccepted) {
+        if (!validated.termsAccepted) {
             return res.status(400).json({ message: 'Вы должны согласиться с условиями пользовательского соглашения' });
         }
 
         if (role === 'company') {
-            if (!validated.authorizedRepresentative || !validated.termsAccepted) {
-                return res.status(400).json({ message: 'Подтвердите, что вы представитель и согласны с условиями' });
+            if (!validated.authorizedRepresentative) {
+                return res.status(400).json({ message: 'Подтвердите, что вы представитель организации' });
+            }
+
+            if (!validateInn(validated.inn)) {
+                return res.status(400).json({ message: 'Некорректный ИНН' });
             }
 
             const innCheck = await fetchCompanyInfoByInn(validated.inn);
             if (!innCheck.success) {
                 return res.status(400).json({ message: innCheck.message });
             }
+
             validated.organizationName = innCheck.name;
+
+            const existingInn = await User.findOne({ inn: validated.inn });
+            if (existingInn) {
+                return res.status(400).json({ message: 'Компания с таким ИНН уже зарегистрирована' });
+            }
         }
 
         const existingUser = await User.findOne({ email: validated.email });
@@ -56,9 +67,13 @@ export const register = async (req, res) => {
 
         res.status(201).json({ message: 'Регистрация успешна. Теперь войдите в систему.' });
     } catch (err) {
-        res.status(400).json({ message: err.details?.[0]?.message || err.message });
+        console.error(err);
+        res.status(400).json({
+            message: err.details?.[0]?.message || err.message || 'Ошибка регистрации'
+        });
     }
 };
+
 
 export const login = async (req, res) => {
     try {

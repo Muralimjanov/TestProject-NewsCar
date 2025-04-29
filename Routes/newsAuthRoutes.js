@@ -5,11 +5,12 @@ import {
     forgotPassword,
     resetPassword
 } from '../Controllers/newsAuthController.js';
+import { loginLimiter } from '../Middleware/loginLimiter.js';
 
 const router = Router();
 
 router.post('/register', register);
-router.post('/login', login);
+router.post('/login', loginLimiter, login);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 
