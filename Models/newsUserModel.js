@@ -3,11 +3,7 @@ import { Schema, model } from 'mongoose';
 const userSchema = new Schema({
     role: {
         type: String,
-        enum: [
-            'user',
-            'company',
-            'admin'
-        ],
+        enum: ['user', 'company', 'admin'],
         required: true,
     },
     firstName: String,
@@ -25,8 +21,13 @@ const userSchema = new Schema({
     inn: String,
     organizationName: String,
     representativeFullName: String,
-    resetPasswordToken: { type: String },
-    resetTokenExpires: { type: Date },
+    emailVerified: {
+        type: Boolean,
+        default: false
+    },
+    emailVerificationToken: String,
+    resetPasswordToken: String,
+    resetTokenExpires: Date
 }, {
     timestamps: true
 });
