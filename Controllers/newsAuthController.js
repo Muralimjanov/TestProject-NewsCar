@@ -3,14 +3,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import config from 'config';
 import { User } from '../Models/newsUserModel.js';
-import { fetchCompanyInfoByInn } from '../services/innService.js';
-import {
-    registerUserSchema,
-    registerCompanySchema,
-    registerAdminSchema,
-    loginSchema
-} from '../Validations/newsAuthValidation.js';
-import { validateInn } from '../utils/validateInn.js';
+import { loginSchema } from '../Validations/newsAuthValidation.js';
 import nodemailer from 'nodemailer';
 
 const JWT_SECRET = config.get("JWT_SECRET");
@@ -33,47 +26,35 @@ const sendVerificationEmail = async (email, token) => {
     await transporter.sendMail(mailOptions);
 };
 
+const loadRoleHandlers = async () => {
+    const {
+        handleUserRegistration,
+        handleCompanyRegistration,
+        handleAdminRegistration
+    } = await import('../services/auth/registerHandlers.js');
+
+    return {
+        user: handleUserRegistration,
+        company: handleCompanyRegistration,
+        admin: handleAdminRegistration
+    };
+};
 
 export const register = async (req, res) => {
     try {
         const { role, password, confirmPassword } = req.body;
 
+        const roleHandlers = await loadRoleHandlers();
+
+        if (!roleHandlers[role]) {
+            return res.status(400).json({ message: 'Недопустимая роль' });
+        }
+
         if (password !== confirmPassword) {
             return res.status(400).json({ message: 'Пароли не совпадают' });
         }
 
-        let validated;
-
-        if (role === 'user') {
-            validated = await registerUserSchema.validateAsync(req.body);
-            if (!validated.termsAccepted) {
-                return res.status(400).json({ message: 'Вы должны согласиться с условиями пользовательского соглашения' });
-            }
-        } else if (role === 'company') {
-            validated = await registerCompanySchema.validateAsync(req.body);
-            if (!validated.authorizedRepresentative || !validated.termsAccepted) {
-                return res.status(400).json({ message: 'Подтвердите, что вы представитель и согласны с условиями' });
-            }
-
-            if (!validateInn(validated.inn)) {
-                return res.status(400).json({ message: 'Некорректный ИНН' });
-            }
-
-            const innCheck = await fetchCompanyInfoByInn(validated.inn);
-            if (!innCheck.success) {
-                return res.status(400).json({ message: innCheck.message });
-            }
-            validated.organizationName = innCheck.name;
-
-            const existingInn = await User.findOne({ inn: validated.inn });
-            if (existingInn) {
-                return res.status(400).json({ message: 'Компания с таким ИНН уже зарегистрирована' });
-            }
-        } else if (role === 'admin') {
-            validated = await registerAdminSchema.validateAsync(req.body);
-        } else {
-            return res.status(400).json({ message: 'Недопустимая роль' });
-        }
+        const validated = await roleHandlers[role](req.body);
 
         const existingUser = await User.findOne({ email: validated.email });
         if (existingUser) {
@@ -92,13 +73,7 @@ export const register = async (req, res) => {
 
         await user.save();
 
-        const mailOptions = {
-            to: user.email,
-            subject: 'Подтверждение Email',
-            text: `Ваш код подтверждения: ${emailVerificationToken}`
-        };
-
-        await transporter.sendMail(mailOptions);
+        await sendVerificationEmail(user.email, emailVerificationToken);
 
         res.status(201).json({ message: 'Регистрация успешна. Проверьте вашу почту для подтверждения.' });
     } catch (err) {
@@ -125,7 +100,6 @@ export const verifyEmail = async (req, res) => {
         res.status(500).json({ message: 'Ошибка сервера при подтверждении email' });
     }
 };
-
 
 export const login = async (req, res) => {
     try {
