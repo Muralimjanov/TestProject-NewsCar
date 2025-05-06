@@ -1,4 +1,4 @@
-import { NewsAdvice } from "../Models/newsAdviceModel.js";
+import { NewsAdvice } from "../Models/newsAdviceModels.js";
 
 export const newsAdviceCreate = async (req, res) => {
     try {

@@ -1,9 +1,9 @@
-import { User } from '../../Models/newsUserModel.js';
+import { User } from '../../Models/UserModels.js';
 import {
     registerUserSchema,
     registerCompanySchema,
     registerAdminSchema
-} from '../../Validations/newsAuthValidation.js';
+} from '../../Validations/AuthValidation.js';
 import { validateInn } from '../../utils/validateInn.js';
 import { fetchCompanyInfoByInn } from '../innService.js';
 

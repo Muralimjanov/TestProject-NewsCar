@@ -1,4 +1,4 @@
-import { NewsExclusive } from "../Models/newsExclusiveModel.js";
+import { NewsExclusive } from "../Models/newsExclusiveModels.js";
 import { validateNewsExclusive } from '../Validations/newsExclusiveValidation.js';
 
 export const newsExclusiveCreate = async (req, res) => {
