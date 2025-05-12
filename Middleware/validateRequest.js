@@ -1,30 +1,17 @@
-export const validateRequest = (...schemas) => {
-    return (req, res, next) => {
+export const validateRequest = (schemasByRole) => {
+    return async (req, res, next) => {
         const role = req.body.role;
 
-        if (!role) {
-            return res.status(400).json({ message: 'Роль обязательна' });
+        if (!schemasByRole[role]) {
+            return res.status(400).json({ message: 'Недопустимая роль для валидации' });
         }
 
-        const schema = schemas.find(s => {
-            try {
-                const roleSchema = s.extract('role');
-                const { value } = roleSchema.validate(role);
-                return !value.error;
-            } catch (err) {
-                return false;
-            }
-        });
-
-        if (!schema) {
-            return res.status(400).json({ message: 'Неверная роль или схема не найдена' });
+        try {
+            await schemasByRole[role].validateAsync(req.body, { abortEarly: false });
+            next();
+        } catch (err) {
+            const errorMessage = err.details?.[0]?.message || 'Ошибка валидации';
+            return res.status(400).json({ message: errorMessage });
         }
-
-        const { error } = schema.validate(req.body);
-        if (error) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
-
-        next();
     };
 };

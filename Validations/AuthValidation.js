@@ -20,7 +20,8 @@ export const registerCompanySchema = Joi.object({
     confirmPassword: Joi.string().valid(Joi.ref('password')).required(),
     authorizedRepresentative: Joi.boolean().valid(true).required(),
     representativeFullName: Joi.string().required(),
-    termsAccepted: Joi.boolean().valid(true).required()
+    termsAccepted: Joi.boolean().valid(true).required(),
+    organizationName: Joi.string().min(2).max(100),
 }).meta({ role: 'company' });
 
 export const registerAdminSchema = Joi.object({

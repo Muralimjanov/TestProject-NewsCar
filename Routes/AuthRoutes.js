@@ -4,7 +4,8 @@ import {
     register,
     forgotPassword,
     resetPassword,
-    resendVerificationEmail
+    resendVerificationEmail,
+    verifyEmail
 } from '../Controllers/AuthControllers.js';
 
 import { loginLimiter } from '../Middleware/loginLimiter.js';
@@ -22,11 +23,17 @@ import {
 
 const router = Router();
 
+router.get('/verify-email/:token', verifyEmail);
 router.post(
     '/register',
-    validateRequest(registerUserSchema, registerCompanySchema, registerAdminSchema),
+    validateRequest({
+        user: registerUserSchema,
+        company: registerCompanySchema,
+        admin: registerAdminSchema
+    }),
     register
 );
+
 router.post('/login', loginLimiter, validateRequest(loginSchema), login);
 router.post('/forgot-password', validateRequest(forgotPasswordValidation), forgotPassword);
 router.post('/reset-password/:token', validateRequest(resetPasswordValidation), resetPassword);
