@@ -8,6 +8,8 @@ import nodemailer from 'nodemailer';
 
 const JWT_SECRET = config.get("JWT_SECRET");
 
+const pendingUsers = new Map();
+
 const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
@@ -22,7 +24,6 @@ const sendVerificationEmail = async (email, token) => {
         subject: 'Подтверждение Email',
         text: `Ваш код подтверждения: ${token}`
     };
-
     await transporter.sendMail(mailOptions);
 };
 
@@ -61,21 +62,20 @@ export const register = async (req, res) => {
             return res.status(400).json({ message: 'Email уже зарегистрирован' });
         }
 
-        const hashedPassword = await bcrypt.hash(validated.password, 10);
-        const emailVerificationToken = crypto.randomBytes(20).toString('hex');
+        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-        const user = new User({
+        const hashedPassword = await bcrypt.hash(validated.password, 10);
+
+        pendingUsers.set(validated.email, {
             ...validated,
             password: hashedPassword,
-            emailVerified: false,
-            emailVerificationToken
+            verificationCode,
+            expiresAt: Date.now() + 10 * 60 * 1000
         });
 
-        await user.save();
+        await sendVerificationEmail(validated.email, verificationCode);
 
-        await sendVerificationEmail(user.email, emailVerificationToken);
-
-        res.status(201).json({ message: 'Регистрация успешна. Проверьте вашу почту для подтверждения.' });
+        res.status(200).json({ message: 'Код подтверждения отправлен на email' });
     } catch (err) {
         res.status(400).json({ message: err.details?.[0]?.message || err.message });
         console.error(err);
@@ -84,22 +84,39 @@ export const register = async (req, res) => {
 
 export const verifyEmail = async (req, res) => {
     try {
-        const { token } = req.params;
+        const { email, code } = req.body;
 
-        const user = await User.findOne({ emailVerificationToken: token });
-        if (!user) {
-            return res.status(400).json({ message: 'Неверный или просроченный токен' });
+        const temp = pendingUsers.get(email);
+        if (!temp) {
+            return res.status(400).json({ message: 'Код не найден. Зарегистрируйтесь снова' });
         }
 
-        user.emailVerified = true;
-        user.emailVerificationToken = undefined;
-        await user.save();
+        if (Date.now() > temp.expiresAt) {
+            pendingUsers.delete(email);
+            return res.status(400).json({ message: 'Код истёк' });
+        }
 
-        res.json({ message: 'Email подтверждён успешно' });
+        if (temp.verificationCode !== code) {
+            return res.status(400).json({ message: 'Неверный код подтверждения' });
+        }
+
+        const user = new User({
+            email: temp.email,
+            password: temp.password,
+            name: temp.name,
+            role: temp.role,
+            emailVerified: true
+        });
+
+        await user.save();
+        pendingUsers.delete(email);
+
+        res.status(201).json({ message: 'Email подтверждён. Пользователь создан' });
     } catch (err) {
-        res.status(500).json({ message: 'Ошибка сервера при подтверждении email' });
+        res.status(500).json({ message: 'Ошибка при подтверждении email' });
     }
 };
+
 
 export const login = async (req, res) => {
     try {

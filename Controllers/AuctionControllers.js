@@ -55,38 +55,6 @@ export const deleteAuction = async (req, res) => {
     }
 };
 
-export const bulkCreate = async (req, res) => {
-    try {
-        const created = await Auction.insertMany(req.body);
-        res.status(201).json(created);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-};
-
-export const bulkUpdate = async (req, res) => {
-    try {
-        const updates = req.body;
-        const results = await Promise.all(updates.map(item =>
-            Auction.findByIdAndUpdate(item._id, item, { new: true })
-        ));
-        res.json(results);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-};
-
-export const bulkDelete = async (req, res) => {
-    try {
-        const ids = req.body;
-        await Auction.deleteMany({ _id: { $in: ids } });
-        res.json({ message: 'Auctions deleted' });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-};
-
-
 export const createManyAuctions = async (req, res) => {
     try {
         const auctions = await Auction.insertMany(req.body);
@@ -99,7 +67,6 @@ export const createManyAuctions = async (req, res) => {
 export const updateManyAuctions = async (req, res) => {
     try {
         const updates = req.body;
-
         const results = await Promise.all(updates.map(async (item) => {
             return await Auction.findByIdAndUpdate(
                 item.id,
@@ -107,7 +74,6 @@ export const updateManyAuctions = async (req, res) => {
                 { new: true }
             );
         }));
-
         res.status(200).json({ message: 'Auctions updated', data: results });
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
