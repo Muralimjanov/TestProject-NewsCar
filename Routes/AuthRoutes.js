@@ -23,7 +23,7 @@ import {
 
 const router = Router();
 
-router.get('/verify-email/:token', verifyEmail);
+router.get('/verify-email/', verifyEmail);
 router.post(
     '/register',
     validateRequest({
