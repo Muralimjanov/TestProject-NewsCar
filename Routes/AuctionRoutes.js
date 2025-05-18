@@ -12,11 +12,11 @@ import {
     updateManyAuctions,
 } from '../Controllers/AuctionControllers.js';
 import { checkAuth } from '../Middleware/authMiddleware.js';
-import { validateRequest } from '../Middleware/validateRequest.js';
+import { checkRole } from '../Middleware/checkRole.js';
 
 const router = Router();
 
-router.use(checkAuth, validateRequest('admin'));
+router.use(checkAuth, checkRole('admin'));
 
 router.post('/', validateBody(auctionSchema), createAuction);
 router.post('/bulk', createManyAuctions);

@@ -21,8 +21,10 @@ export const validateRequest = (schema) => {
             await schema.validateAsync(req.body, { abortEarly: false });
             next();
         } catch (err) {
-            const errorMessage = err.details?.[0]?.message || 'Ошибка валидации';
-            return res.status(400).json({ message: errorMessage });
+            return res.status(400).json({
+                message: 'Ошибка валидации',
+                errors: err.details?.map(detail => detail.message)
+            });
         }
     };
 };
