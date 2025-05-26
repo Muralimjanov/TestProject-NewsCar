@@ -9,7 +9,7 @@ import {
 } from '../Controllers/AuthControllers.js';
 
 import { loginLimiter } from '../Middleware/loginLimiter.js';
-import { validateRequest } from '../Middleware/validateRequest.js';
+import { validateRequestByRole, validateRequest } from '../Middleware/validateRequest.js';
 
 import {
     registerUserSchema,
@@ -26,7 +26,7 @@ const router = Router();
 router.get('/verify-email/', verifyEmail);
 router.post(
     '/register',
-    validateRequest({
+    validateRequestByRole({
         user: registerUserSchema,
         company: registerCompanySchema,
         admin: registerAdminSchema
