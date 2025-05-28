@@ -5,13 +5,13 @@ export const sendDealEmail = async (to, subject, text, pdfPath) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: config.emailUser,
-            pass: config.emailPass
+            user: config.get("EMAIL_USER"),
+            pass: config.get("EMAIL_PASS")
         }
     });
 
     const mailOptions = {
-        from: config.emailUser,
+        from: config.get("EMAIL_USER"),
         to,
         subject,
         text,

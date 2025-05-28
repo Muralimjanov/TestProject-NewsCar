@@ -8,14 +8,35 @@ import {
 } from '../Controllers/BidControllers.js';
 import { validateRequestByRole } from '../Middleware/validateRequest.js';
 import { checkAuth } from '../Middleware/authMiddleware.js';
+import { bidSchema } from '../Validations/BidValidation.js';
 
 const router = Router();
 
-router.post('/', checkAuth, validateRequestByRole('company'), placeBid);
+router.post('/',
+    checkAuth,
+    validateRequestByRole({ company: bidSchema }),
+    placeBid
+);
 router.get('/:auctionId', checkAuth, getBidsByAuction);
 
-router.post('/admin', checkAuth, validateRequestByRole('admin'), adminCreateBid);
-router.put('/admin/:bidId', checkAuth, validateRequestByRole('admin'), adminUpdateBid);
-router.delete('/admin/:bidId', checkAuth, validateRequestByRole('admin'), adminDeleteBid);
+router.post(
+    '/admin',
+    checkAuth,
+    validateRequestByRole({ admin: bidSchema }),
+    adminCreateBid
+);
+router.put(
+    '/admin/:bidId',
+    checkAuth,
+    validateRequestByRole({ admin: bidSchema }),
+    adminUpdateBid
+);
+
+router.delete(
+    '/admin/:bidId',
+    checkAuth,
+    validateRequestByRole({ admin: bidSchema }),
+    adminDeleteBid
+);
 
 export default router;
