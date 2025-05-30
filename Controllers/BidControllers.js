@@ -1,6 +1,6 @@
 import { Bid } from '../Models/BidModels.js';
 import { Auction } from '../Models/AuctionModels.js';
-import { setupBiddingSocket } from '../Sockets/bid.socket.js';
+import { getIO } from '../Sockets/bid.socket.js';
 import { bidSchema } from '../Validations/BidValidation.js';
 
 const extendAuctionIfNeeded = (auction) => {
@@ -15,12 +15,15 @@ const extendAuctionIfNeeded = (auction) => {
 };
 
 const emitBidSocket = (auctionId, price, winnerName, endTime) => {
-    setupBiddingSocket.to(auctionId).emit('newBid', {
-        auctionId,
-        currentPrice: price,
-        winner: winnerName,
-        endTime
-    });
+    const io = getIO();
+    if (io) {
+        io.to(auctionId).emit('newBid', {
+            auctionId,
+            currentPrice: price,
+            winner: winnerName,
+            endTime
+        });
+    }
 };
 
 const handleAutoBids = async (auction, userId) => {

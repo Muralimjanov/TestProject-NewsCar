@@ -1,8 +1,10 @@
 import { Server } from 'socket.io';
 import { Auction } from '../Models/AuctionModels.js';
 
+let io;
+
 export const setupBiddingSocket = (httpServer) => {
-    const io = new Server(httpServer, {
+    io = new Server(httpServer, {
         cors: { origin: '*' }
     });
 
@@ -44,3 +46,5 @@ export const setupBiddingSocket = (httpServer) => {
         });
     });
 };
+
+export const getIO = () => io;
