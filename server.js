@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import config from 'config';
+import cron from 'node-cron';
 import { createServer } from 'http';
 import { connectDB } from './config/dbConnect.js';
 
@@ -21,8 +22,6 @@ const app = express();
 const server = createServer(app);
 const PORT = config.get('serverPort');
 
-const timeFinalizeAuctions = 5 * 60 * 1000;
-
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: "30mb" }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
@@ -37,7 +36,10 @@ app.use('/api/bid', bidRoutes);
 app.use('/api/deal', dealRoutes);
 
 setupBiddingSocket(server);
-setInterval(finalizeAuctions, timeFinalizeAuctions);
+cron.schedule('* * * * *', async () => {
+    console.log('Запуск cron-задачи finalizeAuctions...');
+    await finalizeAuctions();
+});
 const startServer = async () => {
     await connectDB();
 

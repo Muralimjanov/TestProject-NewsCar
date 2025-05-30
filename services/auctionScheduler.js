@@ -5,6 +5,18 @@ export const finalizeAuctions = async () => {
     try {
         const now = new Date();
 
+        const startingAuctions = await Auction.find({
+            startTime: { $lte: now },
+            endTime: { $gt: now },
+            status: 'upcoming'
+        });
+
+        for (const auction of startingAuctions) {
+            auction.status = 'active';
+            await auction.save();
+            console.log(`Аукцион ${auction._id} стал активным.`);
+        }
+
         const expiredAuctions = await Auction.find({
             endTime: { $lte: now },
             status: 'active',
@@ -23,7 +35,8 @@ export const finalizeAuctions = async () => {
 
             console.log(`Аукцион ${auction._id} завершён. Сделка создана.`);
         }
+
     } catch (err) {
-        console.error('Ошибка при завершении аукционов:', err.message);
+        console.error('Ошибка при обновлении аукционов:', err.message);
     }
 };
