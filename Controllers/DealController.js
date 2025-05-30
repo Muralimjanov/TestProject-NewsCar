@@ -1,5 +1,4 @@
 import fs from 'fs/promises';
-import path from 'path';
 import { Deal } from '../Models/DealModels.js';
 import { generateDealPDF } from '../utils/generateDealPDF.js';
 import { sendDealEmail } from '../utils/sendDealEmail.js';

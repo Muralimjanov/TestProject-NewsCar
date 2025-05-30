@@ -12,12 +12,12 @@ import {
 
 import { validateBody } from "../Middleware/validateBody.js";
 import { validateId } from "../Middleware/validateIdMongoose.js";
-import { validateNewsAdvice } from "../Validations/newsAdviceValidation.js";
+import { validateNewsAdvice, validateNewsAdviceArray } from "../Validations/newsAdviceValidation.js";
 
 const router = Router();
 
 router.post('/', validateBody(validateNewsAdvice), newsAdviceCreate);
-router.post('/many', validateBody(validateNewsAdvice), newsAdviceCreateMany);
+router.post('/many', validateBody(validateNewsAdviceArray), newsAdviceCreateMany);
 router.get('/', newsAdviceGetAll);
 router.get('/:id', validateId, newsAdviceGetId);
 router.patch('/:id', validateId, validateBody(validateNewsAdvice), newsAdviceUpdateId);
