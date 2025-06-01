@@ -57,37 +57,59 @@ const handleAutoBids = async (auction, userId) => {
     }
 };
 
+const createBidAndUpdateAuction = async ({
+    auctionId,
+    userId,
+    amount,
+    isAutoBid = false,
+    maxAutoBidAmount = 0,
+    winnerName = '',
+    overrideStatusCheck = false
+}) => {
+    const auction = await Auction.findById(auctionId);
+    if (!auction || (!overrideStatusCheck && auction.status !== 'active')) {
+        throw new Error('Аукцион недоступен для ставок');
+    }
+
+    if (amount <= auction.currentPrice) {
+        throw new Error('Ставка должна быть выше текущей цены');
+    }
+
+    const newBid = await Bid.create({
+        auctionId,
+        userId,
+        amount,
+        isAutoBid,
+        maxAutoBidAmount,
+        createdAt: new Date()
+    });
+
+    auction.currentPrice = amount;
+    auction.winner = userId;
+    extendAuctionIfNeeded(auction);
+    await auction.save();
+
+    emitBidSocket(auctionId, amount, winnerName, auction.endTime);
+    await handleAutoBids(auction, userId);
+
+    return newBid;
+};
+
 
 export const placeBid = async (req, res) => {
     try {
         const { auctionId, amount, isAutoBid, maxAutoBidAmount } = await bidSchema.validateAsync(req.body);
         const userId = req.user._id;
+        const winnerName = req.user.name;
 
-        const auction = await Auction.findById(auctionId);
-        if (!auction || auction.status !== 'active') {
-            return res.status(400).json({ message: 'Аукцион недоступен для ставок' });
-        }
-
-        if (amount <= auction.currentPrice) {
-            return res.status(400).json({ message: 'Ставка должна быть выше текущей цены' });
-        }
-
-        const newBid = await Bid.create({
+        const newBid = await createBidAndUpdateAuction({
             auctionId,
             userId,
             amount,
             isAutoBid,
             maxAutoBidAmount,
-            createdAt: new Date()
+            winnerName
         });
-
-        auction.currentPrice = amount;
-        auction.winner = userId;
-        extendAuctionIfNeeded(auction);
-        await auction.save();
-
-        emitBidSocket(auctionId, amount, req.user.name, auction.endTime);
-        await handleAutoBids(auction, userId);
 
         res.status(201).json(newBid);
     } catch (err) {
@@ -125,6 +147,26 @@ export const adminUpdateBid = async (req, res) => {
 
 
 export const adminCreateBid = async (req, res) => {
-    const newBid = await Bid.create(req.body);
-    res.status(201).json(newBid);
+    try {
+        const { auctionId, amount, isAutoBid, maxAutoBidAmount, userId, name } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ message: 'userId обязателен для админской ставки' });
+        }
+
+        const newBid = await createBidAndUpdateAuction({
+            auctionId,
+            userId,
+            amount,
+            isAutoBid,
+            maxAutoBidAmount,
+            winnerName: name || 'admin',
+            overrideStatusCheck: true
+        });
+
+        res.status(201).json(newBid);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
 };
+
