@@ -1,8 +1,1 @@
-{
-  "mongoURL": "mongodb://localhost:27017/mydatabase1",
-  "serverPort": 8080,
-  "JWT_SECRET": "secret12345",
-  "EMAIL_USER": "ibrover9@gmail.com",
-  "EMAIL_PASS": "qgcx bvvh jsme dakp",
-  "API_KEY_INN": "7ceb1f65f1fefaa788ee57680d4374381dc515c5"
-}
+
