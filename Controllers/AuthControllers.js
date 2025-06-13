@@ -148,13 +148,11 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    const { password: _, ...userData } = user.toObject();
+
     res.json({
       token,
-      user: {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-      },
+      user: userData,
     });
   } catch (err) {
     res.status(400).json({ message: err.details?.[0]?.message || err.message });
