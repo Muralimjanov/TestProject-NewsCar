@@ -18,11 +18,11 @@ const router = Router();
 
 router.use(checkAuth, checkRole('admin'));
 
+router.get('/', checkAuth, getAllAuctions);
 router.post('/', validateBody(auctionSchema), createAuction);
 router.post('/bulk', createManyAuctions);
 router.put('/:id', validateBody(auctionSchema), updateAuction);
 router.put('/bulk', updateManyAuctions);
-router.get('/', getAllAuctions);
 router.get('/:id', getAuctionById);
 router.delete('/:id', deleteAuction);
 router.delete('/bulk', deleteManyAuctions);
