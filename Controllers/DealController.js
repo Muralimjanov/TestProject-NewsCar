@@ -58,7 +58,9 @@ export const deleteDeal = async (req, res) => {
 export const downloadDealDocuments = async (req, res) => {
     try {
         const deal = await Deal.findById(req.params.id).populate('auctionId buyerId');
-        if (!deal) return res.status(404).json({ message: 'Сделка не найдена' });
+        if (!deal) {
+            return res.status(404).json({ message: 'Сделка не найдена' });
+        }
 
         const pdfPath = `./docs/deal-${deal._id}.pdf`;
 

@@ -41,7 +41,9 @@ const handleAutoBids = async (auction) => {
         autoBidders.sort((a, b) => b.maxAutoBidAmount - a.maxAutoBidAmount);
 
         for (const auto of autoBidders) {
-            if (auto.userId.toString() === auction.winner?.toString()) continue;
+            if (auto.userId.toString() === auction.winner?.toString()) {
+                continue;
+            }
 
             if (auto.maxAutoBidAmount > auction.currentPrice) {
                 const increment = 100;
