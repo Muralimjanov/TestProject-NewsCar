@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { Auction } from './AuctionModels';
+import { Auction } from './AuctionModels.js';
 
 const salesmanSchema = new Schema({
     companyName: {

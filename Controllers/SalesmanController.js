@@ -1,5 +1,7 @@
 import { Salesman } from '../Models/SalesmanModels.js';
 import { salesmanValidations } from '../Validations/SalesmanValidation.js';
+import { fetchCompanyInfoByInn } from '../services/innService.js';
+import { validateInn } from '../utils/validateInn.js';
 import { Types } from 'mongoose';
 
 const isValidObjectId = (id) => Types.ObjectId.isValid(id);

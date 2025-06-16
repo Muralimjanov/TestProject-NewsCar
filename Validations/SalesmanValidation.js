@@ -7,5 +7,7 @@ export const salesmanValidations = Joi.object({
     inn: Joi.string().pattern(/^\d{10,12}$/).required(),
     description: Joi.string().required(),
     documentsLink: Joi.string().uri().required(),
-    phone: Joi.string().pattern(/^\+?\d{10,15}$/).required(),
+    phone: Joi.string()
+    .pattern(/^\+?[0-9\s\-()]{10,20}$/)
+    .message('Некорректный формат телефона')
 });
