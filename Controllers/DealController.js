@@ -55,7 +55,6 @@ export const deleteDeal = async (req, res) => {
     }
 };
 
-
 export const downloadDealDocuments = async (req, res) => {
     try {
         const deal = await Deal.findById(req.params.id).populate('auctionId buyerId');

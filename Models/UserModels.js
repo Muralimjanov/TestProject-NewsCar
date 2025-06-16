@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 
 const userSchema = new Schema({
     role: {
@@ -27,7 +27,15 @@ const userSchema = new Schema({
     },
     emailVerificationToken: String,
     resetPasswordToken: String,
-    resetTokenExpires: Date
+    resetTokenExpires: Date,
+    winningAuctions: [{
+        type: Types.ObjectId,
+        ref: 'Auction'
+    }],
+    deals: [{ 
+        type: Types.ObjectId, 
+        ref: 'Deal' 
+    }], 
 }, {
     timestamps: true
 });

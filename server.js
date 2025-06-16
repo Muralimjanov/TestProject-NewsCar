@@ -13,6 +13,7 @@ import newsAuthRoutes from './Routes/AuthRoutes.js';
 import auctionRoutes from './Routes/AuctionRoutes.js';
 import bidRoutes from './Routes/BidRoutes.js';
 import dealRoutes from './Routes/DealRoutes.js';
+import salesmanRoutes from './Routes/SalesmanRoutes.js';
 
 import { setupBiddingSocket } from './Sockets/bid.socket.js';
 
@@ -34,6 +35,7 @@ app.use('/api/news-advice', newsAdviceRoutes);
 app.use('/api/auction', auctionRoutes);
 app.use('/api/bid', bidRoutes);
 app.use('/api/deal', dealRoutes);
+app.use('/api/salesman', salesmanRoutes);
 
 setupBiddingSocket(server);
 cron.schedule('* * * * *', async () => {

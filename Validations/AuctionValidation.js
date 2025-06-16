@@ -16,5 +16,6 @@ export const auctionSchema = Joi.object({
     currentPrice: Joi.number().min(0).optional(),
     startTime: Joi.date().required(),
     endTime: Joi.date().greater(Joi.ref('startTime')).required(),
-    status: Joi.string().valid('upcoming', 'active', 'ended').optional()
+    status: Joi.string().valid('upcoming', 'active', 'ended').optional(),
+    category: Joi.array().items(Joi.string()).optional()
 });

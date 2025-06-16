@@ -42,10 +42,23 @@ const auctionSchema = new Schema({
         default: null
     },
 
+    category: {
+        type: [String],
+        default: []
+    },
+
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+
+    salesman: {
+        type: Types.ObjectId,
+        ref: 'Salesman',
+        required: false
+    } 
+}, {
+    timestamps: true
 });
 
 export const Auction = model('Auction', auctionSchema);

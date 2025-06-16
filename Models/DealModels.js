@@ -28,7 +28,9 @@ const dealSchema = new Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+}, {
+    timestamps: true
 });
 
 export const Deal = model('Deal', dealSchema);

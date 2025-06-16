@@ -1,4 +1,5 @@
 import { Auction } from '../Models/AuctionModels.js';
+import { User } from '../Models/UserModels.js';
 
 export const createAuction = async (req, res) => {
     try {
@@ -85,6 +86,19 @@ export const deleteManyAuctions = async (req, res) => {
         const { ids } = req.body;
         const result = await Auction.deleteMany({ _id: { $in: ids } });
         res.status(200).json({ message: 'Auctions deleted', deletedCount: result.deletedCount });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
+
+export const getMyWins = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).populate('winningAuctions');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({ winningAuctions: user.winningAuctions });
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
     }

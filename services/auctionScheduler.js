@@ -1,5 +1,6 @@
 import { Auction } from '../Models/AuctionModels.js';
 import { Deal } from '../Models/DealModels.js';
+import { User } from '../Models/UserModels.js';
 
 export const finalizeAuctions = async () => {
     try {
@@ -27,14 +28,22 @@ export const finalizeAuctions = async () => {
             auction.status = 'ended';
             await auction.save();
 
-            await Deal.create({
+            const deal = await Deal.create({
                 auctionId: auction._id,
                 buyerId: auction.winner,
                 finalPrice: auction.currentPrice
             });
 
-            console.log(`Аукцион ${auction._id} завершён. Сделка создана.`);
+            await User.findByIdAndUpdate(auction.winner, {
+                $addToSet: {
+                    winningAuctions: auction._id,
+                    deals: deal._id
+                }
+            });
+
+            console.log(`Аукцион ${auction._id} завершён. Сделка создана, пользователь обновлен.`);
         }
+
 
     } catch (err) {
         console.error('Ошибка при обновлении аукционов:', err.message);

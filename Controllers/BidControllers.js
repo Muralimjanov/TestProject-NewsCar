@@ -2,6 +2,7 @@ import { Bid } from '../Models/BidModels.js';
 import { Auction } from '../Models/AuctionModels.js';
 import { getIO } from '../Sockets/bid.socket.js';
 import { bidSchema } from '../Validations/BidValidation.js';
+import { User } from '../Models/UserModels.js';
 
 const extendAuctionIfNeeded = (auction) => {
     const now = new Date();
@@ -26,36 +27,57 @@ const emitBidSocket = (auctionId, price, winnerName, endTime) => {
     }
 };
 
-const handleAutoBids = async (auction, userId) => {
-    const autoBidders = await Bid.find({
-        auctionId: auction._id,
-        isAutoBid: true,
-        userId: { $ne: userId }
-    });
+const handleAutoBids = async (auction) => {
+    let hasChanged = true;
 
-    for (const auto of autoBidders) {
-        if (auto.maxAutoBidAmount > auction.currentPrice) {
-            const increment = 100;
-            const nextAmount = Math.min(auto.maxAutoBidAmount, auction.currentPrice + increment);
+    while (hasChanged) {
+        hasChanged = false;
 
-            await Bid.create({
-                auctionId: auction._id,
-                userId: auto.userId,
-                amount: nextAmount,
-                isAutoBid: true,
-                maxAutoBidAmount: auto.maxAutoBidAmount,
-                createdAt: new Date()
-            });
+        const autoBidders = await Bid.find({
+            auctionId: auction._id,
+            isAutoBid: true,
+        });
 
-            auction.currentPrice = nextAmount;
-            auction.winner = auto.userId;
-            await auction.save();
+        autoBidders.sort((a, b) => b.maxAutoBidAmount - a.maxAutoBidAmount);
 
-            emitBidSocket(auction._id, nextAmount, 'AutoBid', auction.endTime);
-            break;
+        for (const auto of autoBidders) {
+            if (auto.userId.toString() === auction.winner?.toString()) continue;
+
+            if (auto.maxAutoBidAmount > auction.currentPrice) {
+                const increment = 100;
+                const nextAmount = Math.min(auto.maxAutoBidAmount, auction.currentPrice + increment);
+
+                await Bid.create({
+                    auctionId: auction._id,
+                    userId: auto.userId,
+                    amount: nextAmount,
+                    isAutoBid: true,
+                    maxAutoBidAmount: auto.maxAutoBidAmount,
+                    createdAt: new Date()
+                });
+
+                auction.currentPrice = nextAmount;
+                auction.winner = auto.userId;
+                await auction.save();
+
+                await User.findByIdAndUpdate(
+                    auto.userId, {
+                    $addToSet: {
+                        winningAuctions:
+                            auction._id
+                    }
+                });
+
+                emitBidSocket(auction._id, nextAmount, 'AutoBid', auction.endTime);
+
+                hasChanged = true;
+                break;
+            }
         }
     }
 };
+
+
 
 const createBidAndUpdateAuction = async ({
     auctionId,

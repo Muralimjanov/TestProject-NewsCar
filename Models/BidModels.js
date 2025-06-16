@@ -27,6 +27,8 @@ const bidSchema = new Schema({
         type: Date,
         default: Date.now
     }
+}, {
+    timestamps: true
 });
 
 export const Bid = model('Bid', bidSchema);

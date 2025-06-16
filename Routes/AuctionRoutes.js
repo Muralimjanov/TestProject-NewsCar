@@ -10,6 +10,7 @@ import {
     deleteManyAuctions,
     createManyAuctions,
     updateManyAuctions,
+    getMyWins
 } from '../Controllers/AuctionControllers.js';
 import { checkAuth } from '../Middleware/authMiddleware.js';
 import { checkRole } from '../Middleware/checkRole.js';
@@ -26,5 +27,6 @@ router.put('/bulk', updateManyAuctions);
 router.get('/:id', getAuctionById);
 router.delete('/:id', deleteAuction);
 router.delete('/bulk', deleteManyAuctions);
+router.get('/my-wins', checkAuth, getMyWins);
 
 export default router;
