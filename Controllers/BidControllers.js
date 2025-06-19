@@ -18,7 +18,7 @@ const extendAuctionIfNeeded = (auction) => {
 const emitBidSocket = (auctionId, price, winnerName, endTime) => {
     const io = getIO();
     if (io) {
-        io.to(auctionId).emit("newBid", {
+        io.to(auctionId).emit("new_bid", {
             auctionId,
             currentPrice: price,
             winner: winnerName,
