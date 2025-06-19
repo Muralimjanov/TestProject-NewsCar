@@ -1,1 +1,8 @@
-
+{
+  "mongoURL": "mongodb+srv://diyormuralimjanovvv:admin@cluster0.to1g2gd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+  "serverPort": 8080,
+  "JWT_SECRET": "secret12345",
+  "EMAIL_USER": "tezjarnama.ru@gmail.com",
+  "EMAIL_PASS": "mqky whpg sxyj nelv",
+  "API_KEY_INN": "7ceb1f65f1fefaa788ee57680d4374381dc515c5"
+}
