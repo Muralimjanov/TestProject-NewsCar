@@ -37,7 +37,7 @@ router.post(
   register
 );
 
-router.post("/login", loginLimiter, validateRequest(loginSchema), login);
+router.post("/login", validateRequest(loginSchema), login);
 router.post(
   "/forgot-password",
   validateRequest(forgotPasswordValidation),
