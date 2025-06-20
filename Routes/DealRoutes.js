@@ -4,7 +4,8 @@ import {
     getDealById,
     createDeal,
     deleteDeal,
-    downloadDealDocuments
+    downloadDealDocuments,
+    updateDeal
 } from '../Controllers/DealController.js';
 import { checkAuth } from '../Middleware/authMiddleware.js';
 import { validateRequestByRole } from '../Middleware/validateRequest.js';
@@ -16,6 +17,7 @@ router.get('/', checkAuth, validateRequestByRole({ admin: dealSchema }), getAllD
 router.get('/:id', checkAuth, getDealById);
 router.post('/', checkAuth, validateRequestByRole({ admin: dealSchema }), createDeal);
 router.delete('/:id', checkAuth, validateRequestByRole({ admin: dealSchema }), deleteDeal);
-router.get('/download/:id', checkAuth, downloadDealDocuments)
+router.get('/download/:id', checkAuth, downloadDealDocuments);
+router.patch("/:dealId", checkAuth, updateDeal);
 
 export default router;

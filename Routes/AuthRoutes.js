@@ -6,6 +6,7 @@ import {
     resetPassword,
     resendVerificationEmail,
     verifyEmail,
+    getUserById
 } from "../Controllers/AuthControllers.js";
 
 import { loginLimiter } from "../Middleware/loginLimiter.js";
@@ -53,5 +54,9 @@ router.post(
     validateRequest(resendVerificationValidation),
     resendVerificationEmail
 );
+router.get(
+    "/user/:userId",
+    getUserById
+)
 
 export default router;
